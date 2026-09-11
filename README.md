@@ -5,6 +5,9 @@ network for property prediction on inorganic nanoparticles, evaluated on the six
 CHILI-100K benchmark tasks: crystal-system, space-group and atom-type classification, and
 SAXS, XRD and xPDF scattering-pattern regression.
 
+Benchmark data, trained weights and training records are archived on Harvard Dataverse:
+**https://doi.org/10.7910/DVN/QC34B9**
+
 | | |
 |---|---|
 | Paper | *Radial Hyena Networks for Property Prediction of Nanomaterials* |
@@ -143,8 +146,9 @@ protocol, so the reported MSE is dimensionless.
 </p>
 
 The benchmark subset is distributed as a single HDF5 file (`chili100k_benchmark.h5`,
-128 MB) on Dataverse. It can be rebuilt from, and verified against, the original CHILI-100K
-release with [`scripts/build_benchmark.py`](scripts/build_benchmark.py).
+128 MB) on [Dataverse](https://doi.org/10.7910/DVN/QC34B9). It can be rebuilt from, and
+verified against, the original CHILI-100K release with
+[`scripts/build_benchmark.py`](scripts/build_benchmark.py).
 
 ---
 
@@ -316,8 +320,9 @@ python -m pytest -q                      # unit tests (the data test runs once d
 
 ### 2. Download data, weights and training records
 
-The Dataverse dataset holds the benchmark file, the 21 released checkpoints and the
-training records (per-epoch histories, split indices, software versions):
+The [Dataverse dataset](https://doi.org/10.7910/DVN/QC34B9) holds the benchmark file, the
+21 released checkpoints and the training records (per-epoch histories, split indices,
+software versions):
 
 | File | Contents |
 |---|---|
