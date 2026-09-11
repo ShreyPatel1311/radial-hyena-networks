@@ -5,14 +5,15 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "radial-hyena"
 version = "1.0.0"
-description = "Three-stream cross-gated Radial Hyena network with a KAN read-out for CHILI-100K"
+description = "Radial Hyena networks for property prediction of nanomaterials (CHILI-100K)"
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.10"
 dependencies = [
     "torch>=2.1",
     "torch-geometric>=2.5",
     "numpy>=1.24",
-    "scipy>=1.11",
+    "scipy>=1.15",
     "scikit-learn>=1.3",
     "h5py>=3.9",
     "matplotlib>=3.7",

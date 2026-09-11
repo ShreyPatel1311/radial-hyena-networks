@@ -1,14 +1,6 @@
-"""Kolmogorov-Arnold Network read-out (efficient-KAN formulation).
-
-Each KANLinear edge (i, j) computes
-
-    y_ij(x) = base_weight[i,j] * SiLU(x_j)  +  phi_ij(x_j)
-
-where phi_ij is a B-spline with `grid_size + spline_order` coefficients.
-
-Adapted from https://github.com/Blealtan/efficient-kan.
-"""
+"""B-spline Kolmogorov-Arnold layers (efficient-KAN formulation)."""
 from __future__ import annotations
+
 import math
 
 import torch
@@ -17,6 +9,12 @@ import torch.nn.functional as F
 
 
 class KANLinear(nn.Module):
+    """y_o = sum_i [ W_base[o,i] * SiLU(x_i) + sum_c W_spline[o,i,c] * B_c(x_i) ]
+
+    B_c are cubic B-splines on a uniform grid over `grid_range`, extended by
+    `spline_order` knots on each side (grid_size + spline_order coefficients per edge).
+    """
+
     def __init__(self, in_features, out_features, grid_size=5, spline_order=3,
                  scale_noise=0.1, scale_base=1.0, scale_spline=1.0,
                  base_activation=nn.SiLU, grid_range=(-1., 1.)):
@@ -28,8 +26,8 @@ class KANLinear(nn.Module):
                 .expand(in_features, -1).contiguous())
         self.register_buffer("grid", grid)
         self.base_weight = nn.Parameter(torch.empty(out_features, in_features))
-        self.spline_weight = nn.Parameter(
-            torch.empty(out_features, in_features, grid_size + spline_order))
+        self.spline_weight = nn.Parameter(torch.empty(out_features, in_features,
+                                                      grid_size + spline_order))
         self.scale_base, self.scale_spline, self.scale_noise = scale_base, scale_spline, scale_noise
         self.base_activation = base_activation()
         self.reset_parameters()
@@ -43,7 +41,7 @@ class KANLinear(nn.Module):
                 self.grid.T[self.spline_order:-self.spline_order], noise))
 
     def b_splines(self, x):
-        """B-spline bases at x -> (batch, in_features, grid_size + spline_order)."""
+        """(n, in) -> (n, in, grid_size + spline_order) basis values (Cox-de Boor)."""
         grid = self.grid
         x = x.unsqueeze(-1)
         bases = ((x >= grid[:, :-1]) & (x < grid[:, 1:])).to(x.dtype)
@@ -53,7 +51,6 @@ class KANLinear(nn.Module):
         return bases.contiguous()
 
     def curve2coeff(self, x, y):
-        """Least-squares fit of spline coefficients to sampled curve values."""
         A = self.b_splines(x).transpose(0, 1)
         B = y.transpose(0, 1)
         sol = torch.linalg.lstsq(A, B).solution
@@ -69,11 +66,12 @@ class KANLinear(nn.Module):
 
 
 class KAN(nn.Module):
+    """Stack of KANLinear layers; dropout between layers."""
+
     def __init__(self, layers, grid_size=5, spline_order=3, dropout=0.0):
         super().__init__()
-        self.blocks = nn.ModuleList([
-            KANLinear(a, b, grid_size=grid_size, spline_order=spline_order)
-            for a, b in zip(layers[:-1], layers[1:])])
+        self.blocks = nn.ModuleList([KANLinear(a, b, grid_size=grid_size, spline_order=spline_order)
+                                     for a, b in zip(layers[:-1], layers[1:])])
         self.dropout = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
 
     def forward(self, x):
