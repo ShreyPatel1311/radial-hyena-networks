@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Fetch the benchmark data, released checkpoints and training records from Hugging Face.
+"""Fetch the benchmark data, released checkpoints and training records.
 
     python scripts/download.py --all            # everything (~190 MB)
     python scripts/download.py --data           # data/chili100k_benchmark.h5
     python scripts/download.py --checkpoints    # checkpoints/*.pt (21 files)
     python scripts/download.py --records        # results/training/ (training histories)
 
-The repository is set in radial_hyena/hub.py (or export RADIAL_HYENA_HF_REPO=...).
-Every file is checked against the MD5 checksums in the repository's MANIFEST.md5.
+Files come from the anonymous mirror of the Hugging Face repository (id in
+radial_hyena/hub.py, or export RADIAL_HYENA_ANON_ID=...); pass --repo to download from a
+Hugging Face repository directly. Every file is checked against the MD5 checksums in the
+repository's MANIFEST.md5.
 
 Files downloaded by hand, e.g. through a browser, can be verified and put in place with
 
@@ -64,8 +66,11 @@ def main():
     ap.add_argument("--data", action="store_true")
     ap.add_argument("--checkpoints", action="store_true")
     ap.add_argument("--records", action="store_true")
-    ap.add_argument("--repo", default=hub.REPO_ID, help="Hugging Face repository id")
-    ap.add_argument("--revision", default=None, help="branch, tag or commit of the repository")
+    ap.add_argument("--anon-id", default=hub.ANON_ID, help="id of the anonymous mirror")
+    ap.add_argument("--repo", default=None,
+                    help="download from this Hugging Face repository instead of the mirror")
+    ap.add_argument("--revision", default=None,
+                    help="branch, tag or commit (with --repo)")
     ap.add_argument("--from-dir", default=None,
                     help="verify a hand-downloaded copy of the repository and install it")
     a = ap.parse_args()
@@ -76,9 +81,12 @@ def main():
     if not (a.all or a.data or a.checkpoints or a.records):
         ap.error("choose --all, --data, --checkpoints, --records or --from-dir")
 
-    manifest = hub.read_manifest(a.repo, a.revision)
+    if a.revision and not a.repo:
+        ap.error("--revision applies only with --repo")
+    manifest = hub.read_manifest(a.anon_id, a.repo, a.revision)
     for rel in _selected(a, manifest):
-        path = hub.fetch(rel, DEST[rel.split("/", 1)[0]], manifest, a.repo, a.revision)
+        path = hub.fetch(rel, DEST[rel.split("/", 1)[0]], manifest,
+                         anon_id=a.anon_id, repo_id=a.repo, revision=a.revision)
         print(f"  {path}")
 
 

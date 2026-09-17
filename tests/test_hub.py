@@ -20,6 +20,11 @@ def test_parse_manifest_handles_md5sum_formats():
                  "checkpoints/atom_seed0.pt": "0cc175b9c0f1b6a831c399e269772661"}
 
 
+def test_anon_url_points_at_the_mirror_resolve_endpoint():
+    assert (hub.anon_url("checkpoints/atom_seed0.pt", "abc123")
+            == "https://anonymous-hf.com/api/a/abc123/resolve/checkpoints/atom_seed0.pt")
+
+
 def test_verify_local_reports_ok_missing_and_mismatch(tmp_path):
     (tmp_path / "data").mkdir()
     (tmp_path / "checkpoints").mkdir()

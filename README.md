@@ -332,24 +332,24 @@ indices, software versions):
 | `records/` | training records: `<task>_seed<k>_results.json`, `space_group_seed<k>_history.json`, `*.log` |
 | `MANIFEST.md5` | MD5 checksums of every file |
 
-**During review**, download the repository through the link above and install it with
+```bash
+python scripts/download.py --all      # -> data/, checkpoints/, results/training/
+```
+
+The script downloads from the anonymous mirror linked above and checks every file against
+`MANIFEST.md5`. The mirror id is set in [`radial_hyena/hub.py`](radial_hyena/hub.py);
+override it with `--anon-id` or the `RADIAL_HYENA_ANON_ID` environment variable. To download
+from a Hugging Face repository directly instead, pass `--repo <repository id>` (optionally
+with `--revision`), which requires `pip install huggingface_hub`.
+
+Files downloaded by hand through the link can be verified and put in place with
 
 ```bash
 python scripts/download.py --from-dir /path/to/downloaded/repository
 ```
 
-which checks every file against `MANIFEST.md5` and copies it to `data/`, `checkpoints/` and
-`results/training/`; nothing is installed if any file is missing or fails its checksum.
-
-**Direct download** from the Hugging Face repository:
-
-```bash
-python scripts/download.py --all      # -> data/, checkpoints/, results/training/
-```
-
-The repository id is set in [`radial_hyena/hub.py`](radial_hyena/hub.py); override it with
-`--repo` or the `RADIAL_HYENA_HF_REPO` environment variable, and pin a version with
-`--revision`. Every download is checked against `MANIFEST.md5`.
+which copies them to `data/`, `checkpoints/` and `results/training/`; nothing is installed
+if any file is missing or fails its checksum.
 
 ### 3. Benchmark table
 
