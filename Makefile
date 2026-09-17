@@ -12,7 +12,7 @@ help:
 setup:  ## install dependencies
 	pip install -r requirements.txt
 
-download:  ## benchmark data, 21 checkpoints and training records from Dataverse
+download:  ## benchmark data, 21 checkpoints and training records from Hugging Face
 	python scripts/download.py --all
 
 test:  ## unit tests

@@ -5,13 +5,13 @@ network for property prediction on inorganic nanoparticles, evaluated on the six
 CHILI-100K benchmark tasks: crystal-system, space-group and atom-type classification, and
 SAXS, XRD and xPDF scattering-pattern regression.
 
-Benchmark data, trained weights and training records are archived on Harvard Dataverse:
-**https://doi.org/10.7910/DVN/QC34B9**
+Benchmark data, trained weights and training records are hosted on Hugging Face:
+**https://anonymous-hf.com/a/jp5aih03acut/**
 
 | | |
 |---|---|
 | Paper | *Radial Hyena Networks for Property Prediction of Nanomaterials* |
-| Data, weights, training records | Harvard Dataverse: [`doi:10.7910/DVN/QC34B9`](https://doi.org/10.7910/DVN/QC34B9) |
+| Data, weights, training records | Hugging Face: [anonymous-hf.com/a/jp5aih03acut](https://anonymous-hf.com/a/jp5aih03acut/) |
 | Dataset | CHILI-100K (Friis-Jensen et al., 2024), official 2,975-graph benchmark subset |
 | Licence | MIT (code) |
 
@@ -146,9 +146,9 @@ protocol, so the reported MSE is dimensionless.
 </p>
 
 The benchmark subset is distributed as a single HDF5 file (`chili100k_benchmark.h5`,
-128 MB) on [Dataverse](https://doi.org/10.7910/DVN/QC34B9). It can be rebuilt from, and
-verified against, the original CHILI-100K release with
-[`scripts/build_benchmark.py`](scripts/build_benchmark.py).
+123 MB) on [Hugging Face](https://anonymous-hf.com/a/jp5aih03acut/), redistributed under the
+CC-BY-4.0 licence of CHILI-100K. It can be rebuilt from, and verified against, the original
+CHILI-100K release with [`scripts/build_benchmark.py`](scripts/build_benchmark.py).
 
 ---
 
@@ -320,25 +320,36 @@ python -m pytest -q                      # unit tests (the data test runs once d
 
 ### 2. Download data, weights and training records
 
-The [Dataverse dataset](https://doi.org/10.7910/DVN/QC34B9) holds the benchmark file, the
-21 released checkpoints and the training records (per-epoch histories, split indices,
-software versions):
+The [Hugging Face repository](https://anonymous-hf.com/a/jp5aih03acut/) holds the benchmark
+file, the 21 released checkpoints and the training records (per-epoch histories, split
+indices, software versions):
 
 | File | Contents |
 |---|---|
-| `chili100k_benchmark.h5` | the 2,975 benchmark graphs, labels, scattering curves and split |
-| `<task>_seed<k>.pt` | weights of the 18 reported models (`task` ∈ crystal_system, space_group, atom, saxs, xrd, xpdf) |
-| `space_group_trainvocab_seed<k>.pt` | space-group models with the train-split vocabulary (used in the analyses) |
-| `<task>_seed<k>_results.json`, `space_group_seed<k>_history.json`, `*.log` | training records |
+| `data/chili100k_benchmark.h5` | the 2,975 benchmark graphs, labels, scattering curves and split |
+| `checkpoints/<task>_seed<k>.pt` | weights of the 18 reported models (`task` ∈ crystal_system, space_group, atom, saxs, xrd, xpdf) |
+| `checkpoints/space_group_trainvocab_seed<k>.pt` | space-group models with the train-split vocabulary (used in the analyses) |
+| `records/` | training records: `<task>_seed<k>_results.json`, `space_group_seed<k>_history.json`, `*.log` |
 | `MANIFEST.md5` | MD5 checksums of every file |
+
+**During review**, download the repository through the link above and install it with
+
+```bash
+python scripts/download.py --from-dir /path/to/downloaded/repository
+```
+
+which checks every file against `MANIFEST.md5` and copies it to `data/`, `checkpoints/` and
+`results/training/`; nothing is installed if any file is missing or fails its checksum.
+
+**Direct download** from the Hugging Face repository:
 
 ```bash
 python scripts/download.py --all      # -> data/, checkpoints/, results/training/
 ```
 
-(The DOI defaults to [`doi:10.7910/DVN/QC34B9`](https://doi.org/10.7910/DVN/QC34B9); override with `RADIAL_HYENA_DOI` if needed.)
-
-Every download is checked against the MD5 checksum reported by Dataverse.
+The repository id is set in [`radial_hyena/hub.py`](radial_hyena/hub.py); override it with
+`--repo` or the `RADIAL_HYENA_HF_REPO` environment variable, and pin a version with
+`--revision`. Every download is checked against `MANIFEST.md5`.
 
 ### 3. Benchmark table
 
@@ -422,7 +433,7 @@ versions, and from the batches that the 4 GB test GPU evaluated on the CPU.
 ## Repository layout
 
 ```
-radial_hyena/          model, KAN layers, data pipeline, metrics, checkpoint and Dataverse helpers
+radial_hyena/          model, KAN layers, data pipeline, metrics, checkpoint and Hugging Face download helpers
 scripts/               train.py, evaluate.py, download.py, build_benchmark.py
 experiments/           descriptors, couplings, internals (gates + probes), stream ablation, data card
 splits/                benchmark subset and official split (tracked)
